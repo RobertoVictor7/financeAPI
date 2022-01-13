@@ -115,5 +115,19 @@ app.get("/statement/date", verifyIfExistsAccountCPF, (req, res) => { // novo sta
 
 })
 
+app.put("/account", verifyIfExistsAccountCPF, (req, res) => { // metodo PUT para atualização do nome da conta 
+    const {name} = req.body;
+    const {customer} = req;
+
+    customer.name = name;
+
+    return res.status(201).send()
+});
+
+app.get("/account", verifyIfExistsAccountCPF, (req, res) => { // atualizando os dados da conta 
+    const {customer} = req;
+
+    return res.json(customer) 
+})
 
 app.listen(3333); // porta onde vai rodar a API 
