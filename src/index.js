@@ -6,7 +6,7 @@ const app = express(); // alocando express a variável app
 
 app.use(express.json()); //middleware para receber um JSON 
 
-const costumers = []; // array de usuarios para nosso banco (fake BDD)
+const customers = []; // array de usuarios para nosso banco (fake BDD)
 /**
  * Dados da conta:
  * CPF  - string
@@ -24,16 +24,22 @@ app.post("/account", (req, res) => { //utilizar o metódo POST para criar a cont
         return res.status(400).json({error:"Customer alredy exists!"}) // Mensagem de erro retornada se o CPF já for existente 
     } 
 
-    const id = uuidv4(); // gerando iD's com o uuid 
-
-    costumers.push({ //utilizar o metodo PUSH para inserir dados dentro de um Array 
+    customers.push({ //utilizar o metodo PUSH para inserir dados dentro de um Array 
         cpf,
         name,
-        id,
-        statement: []
+        id: uuidv4(), // gerando iD's com o uuid ,
+        statement: [],
     });
     
     return res.status(201).send()
 }) 
+
+app.get("/statement/:cpf", (req,res) => {//utilizar o metodo GET para buscar extrato báncario do cliente
+    const { cpf } = req.params;
+
+    const customer = customers.find(customer => customer.cpf === cpf); // verifica se dentro do Array customers existe um customer com o CPF igual
+
+    return res.json(customer.statement);
+})
 
 app.listen(3333); // porta onde vai rodar a API 
