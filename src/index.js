@@ -1,19 +1,28 @@
-const { response } = require("express");
-const express = require("express"); //importando o express para o projeto
-const { v4: uuidv4 } = require("uuid") //importando o uuid para o projeto
+const { response, request } = require("express");
+const express = require("express"); // importando o express para o projeto
+const { v4: uuidv4 } = require("uuid") // importando o uuid para o projeto
 
 const app = express(); // alocando express a variável app
 
-app.use(express.json()); //middleware para receber um JSON 
+app.use(express.json()); // middleware para receber um JSON 
 
 const customers = []; // array de usuarios para nosso banco (fake BDD)
-/**
- * Dados da conta:
- * CPF  - string
- * name - string
- * id - uuid (universely unique identifier)
- * statement(extrato) - array  
- */
+
+// Middleware 
+function verifyIfExistsAccountCPF(req, res, next){
+    const { cpf } = req.headers;
+
+    const customer = customers.find(customer => customer.cpf === cpf); // verifica se dentro do Array customers existe um customer com o CPF igual
+
+    if(!customer) {
+        return res.status(400).json({error:"Customer not found"}); // verifica se o costumer existe 
+    }
+
+    req.customer = customer; // todos os middlewares que chamarem verifyIfExistsAccountCPF tem acesso ao request customer
+
+    return next();
+
+}
 
 app.post("/account", (req, res) => { //utilizar o metódo POST para criar a conta (metódo utilizado para a criação de dados)
     const {cpf, name} = req.body; // request.body parametro que recebemos para inserção de dados 
@@ -34,16 +43,11 @@ app.post("/account", (req, res) => { //utilizar o metódo POST para criar a cont
     return res.status(201).send()
 }) 
 
-app.get("/statement/:cpf", (req,res) => {//utilizar o metodo GET para buscar extrato báncario do cliente
-    const { cpf } = req.params;
+//app.use(verifyIfExistsAccountCPF); forma de todas as rotas que vierem em diante utilizem o middleware 
 
-    const customer = customers.find(customer => customer.cpf === cpf); // verifica se dentro do Array customers existe um customer com o CPF igual
-
-    if(!customer) {
-        return res.status(400).json({error:"Customer not found"});
-    }
-
-    return res.json(customer.statement);
+app.get("/statement", verifyIfExistsAccountCPF, (req,res) => { // utilizar o metodo GET para buscar extrato báncario do cliente
+    const {customer} = req;
+     return res.json(customer.statement);
 })
 
 app.listen(3333); // porta onde vai rodar a API 
