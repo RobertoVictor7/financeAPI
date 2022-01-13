@@ -73,7 +73,7 @@ app.post("/deposit",verifyIfExistsAccountCPF, (req, res) => { // utilizar o meto
     const statementOperation = { // Operação bancaria, com descrição, quantia, data e tipo (credito, débito)
         description,
         amount,
-        create_at: new Date(),
+        created_at: new Date(),
         type: "credit"
     }
 
@@ -94,7 +94,7 @@ app.post("/withdraw", verifyIfExistsAccountCPF, (req, res) => {
 
     const statementOperation = {
         amount,
-        create_at: new Date(),
+        created_at: new Date(),
         type: "debit"
     }
 
@@ -102,4 +102,18 @@ app.post("/withdraw", verifyIfExistsAccountCPF, (req, res) => {
 
     return res.status(201).send();
 })
+
+app.get("/statement/date", verifyIfExistsAccountCPF, (req, res) => { // novo statement agora listando extrado por data 
+    const {customer} = req; // conseguindo acesso ao costumer
+    const {date} = req.query; // conseguindo acesso a data 
+
+    const dateFormat = new Date(date + " 00:00"); // mudando todos os horarios para 00:00 
+
+    const statement = customer.statement.filter((statement) => statement.created_at.toDateString() === new Date(dateFormat).toDateString()) 
+
+    return res.json(statement);
+
+})
+
+
 app.listen(3333); // porta onde vai rodar a API 
