@@ -39,6 +39,10 @@ app.get("/statement/:cpf", (req,res) => {//utilizar o metodo GET para buscar ext
 
     const customer = customers.find(customer => customer.cpf === cpf); // verifica se dentro do Array customers existe um customer com o CPF igual
 
+    if(!customer) {
+        return res.status(400).json({error:"Customer not found"});
+    }
+
     return res.json(customer.statement);
 })
 
