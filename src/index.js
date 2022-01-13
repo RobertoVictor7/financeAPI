@@ -46,8 +46,26 @@ app.post("/account", (req, res) => { //utilizar o metódo POST para criar a cont
 //app.use(verifyIfExistsAccountCPF); forma de todas as rotas que vierem em diante utilizem o middleware 
 
 app.get("/statement", verifyIfExistsAccountCPF, (req,res) => { // utilizar o metodo GET para buscar extrato báncario do cliente
-    const {customer} = req;
+
+    const {customer} = req; // conseguindo acesso ao costumer
      return res.json(customer.statement);
+
 })
 
+app.post("/deposit",verifyIfExistsAccountCPF, (req, res) => { // utilizar o metodo POST para criar um depósito
+    const {description, amount} = req.body; 
+
+    const {customer} = req; // conseguindo acesso ao costumer 
+
+    const statementOperation = { // Operação bancaria, com descrição, quantia, data e tipo (credito, débito)
+        description,
+        amount,
+        create_at: new Date(),
+        type: "credit"
+    }
+
+    customer.statement.push(statementOperation);
+
+    return res.status(201).send();
+})
 app.listen(3333); // porta onde vai rodar a API 
