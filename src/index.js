@@ -24,6 +24,19 @@ function verifyIfExistsAccountCPF(req, res, next){
 
 }
 
+// Função para conseguir o balanço da conta 
+function getBalance(statement) {
+    const balance = statement.reduce((acc, operation) => { // reduce transforma valores em um valor apenas
+        if(operation.type === "credit") {
+            return acc + operation.amount
+        }else {
+            return acc - operation.amount
+        }
+    }, 0) ;
+
+    return balance
+}
+
 app.post("/account", (req, res) => { //utilizar o metódo POST para criar a conta (metódo utilizado para a criação de dados)
     const {cpf, name} = req.body; // request.body parametro que recebemos para inserção de dados 
 
@@ -45,7 +58,7 @@ app.post("/account", (req, res) => { //utilizar o metódo POST para criar a cont
 
 //app.use(verifyIfExistsAccountCPF); forma de todas as rotas que vierem em diante utilizem o middleware 
 
-app.get("/statement", verifyIfExistsAccountCPF, (req,res) => { // utilizar o metodo GET para buscar extrato báncario do cliente
+app.get("/statement", verifyIfExistsAccountCPF, (req, res) => { // utilizar o metodo GET para buscar extrato báncario do cliente
 
     const {customer} = req; // conseguindo acesso ao costumer
      return res.json(customer.statement);
@@ -65,6 +78,27 @@ app.post("/deposit",verifyIfExistsAccountCPF, (req, res) => { // utilizar o meto
     }
 
     customer.statement.push(statementOperation);
+
+    return res.status(201).send();
+})
+
+app.post("/withdraw", verifyIfExistsAccountCPF, (req, res) => {
+    const {amount} = req.body; // informação que vamos precisar inserir sendo desestruturadas
+    const {customer} = req; // acesso ao costumer
+
+    const balance = getBalance(customer.statement)
+
+    if(amount > balance) { // validação no caso do valor do saque ser maior que a quantia disponivel na conta 
+        return res.status(400).send("ERROR, Insufficient funds!")
+    }
+
+    const statementOperation = {
+        amount,
+        create_at: new Date(),
+        type: "debit"
+    }
+
+    customer.statement.push(statementOperation)
 
     return res.status(201).send();
 })
