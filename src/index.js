@@ -130,4 +130,19 @@ app.get("/account", verifyIfExistsAccountCPF, (req, res) => { // atualizando os 
     return res.json(customer) 
 })
 
+app.delete("/account", verifyIfExistsAccountCPF, (req, res) => { // utilizando metodo DELETE para deletar a conta
+    const {customer} = req;
+
+    customers.splice(customer, 1) // utilizar a function splice para remover o array
+
+    return res.status(200).json(customers)
+})
+
+app.get("/balance", verifyIfExistsAccountCPF, (req, res) => {
+    const {customer} = req;
+
+    const balance = getBalance(customer.statement);
+
+    return res.json(balance)
+})
 app.listen(3333); // porta onde vai rodar a API 
