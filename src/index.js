@@ -1,4 +1,3 @@
-const { response, request } = require("express");
 const express = require("express"); // importando o express para o projeto
 const { v4: uuidv4 } = require("uuid") // importando o uuid para o projeto
 
